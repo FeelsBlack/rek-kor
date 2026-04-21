@@ -1,0 +1,8 @@
+*.pyc
+__pycache__/
+.env
+.DS_Store
+*.pdf
+*.jpg
+*.png
+postgres_data/
