@@ -26,6 +26,8 @@ Ensure the output is a raw JSON object matching this schema:
   "account_number": "string",
   "account_holder": "string",
   "statement_period": "string",
+  "opening_balance": float (0 if missing),
+  "closing_balance": float (0 if missing),
   "transactions": [
     {
       "date": "string (e.g., YYYY-MM-DD or as written)",
