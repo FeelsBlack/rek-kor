@@ -17,6 +17,17 @@ def upload_and_process(file: UploadFile = File(...), db: Session = Depends(get_d
         contents = file.file.read()
         extracted_data = process_document(contents, file.filename)
 
+        # Fallback calculation for summaries if Gemini fails to extract them
+        if extracted_data.transactions:
+            if extracted_data.total_debit_amount == 0.0:
+                extracted_data.total_debit_amount = sum(t.debit for t in extracted_data.transactions)
+            if extracted_data.total_credit_amount == 0.0:
+                extracted_data.total_credit_amount = sum(t.credit for t in extracted_data.transactions)
+            if extracted_data.debit_transaction_count == 0:
+                extracted_data.debit_transaction_count = sum(1 for t in extracted_data.transactions if t.debit > 0)
+            if extracted_data.credit_transaction_count == 0:
+                extracted_data.credit_transaction_count = sum(1 for t in extracted_data.transactions if t.credit > 0)
+
         # Save to database
         db_statement = Statement(
             filename=file.filename,
@@ -25,7 +36,11 @@ def upload_and_process(file: UploadFile = File(...), db: Session = Depends(get_d
             account_holder=extracted_data.account_holder,
             statement_period=extracted_data.statement_period,
             opening_balance=extracted_data.opening_balance,
-            closing_balance=extracted_data.closing_balance
+            closing_balance=extracted_data.closing_balance,
+            total_debit_amount=extracted_data.total_debit_amount,
+            total_credit_amount=extracted_data.total_credit_amount,
+            debit_transaction_count=extracted_data.debit_transaction_count,
+            credit_transaction_count=extracted_data.credit_transaction_count
         )
         db.add(db_statement)
         db.flush() # get the ID
@@ -34,6 +49,7 @@ def upload_and_process(file: UploadFile = File(...), db: Session = Depends(get_d
             db_txn = Transaction(
                 statement_id=db_statement.id,
                 date=txn.date,
+                time=txn.time,
                 description=txn.description,
                 debit=txn.debit,
                 credit=txn.credit,
@@ -66,6 +82,7 @@ def reconcile_data(request: ReconciliationRequest, db: Session = Depends(get_db)
     transactions = [
         {
             "date": t.date,
+            "time": t.time,
             "description": t.description,
             "debit": t.debit,
             "credit": t.credit,
@@ -79,6 +96,10 @@ def reconcile_data(request: ReconciliationRequest, db: Session = Depends(get_db)
         statement_period=db_statement.statement_period,
         opening_balance=db_statement.opening_balance,
         closing_balance=db_statement.closing_balance,
+        total_debit_amount=db_statement.total_debit_amount,
+        total_credit_amount=db_statement.total_credit_amount,
+        debit_transaction_count=db_statement.debit_transaction_count,
+        credit_transaction_count=db_statement.credit_transaction_count,
         transactions=transactions
     )
 
