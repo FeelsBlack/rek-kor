@@ -15,8 +15,15 @@ if GEMINI_API_KEY:
 MODEL_NAME = "gemini-1.5-flash"
 
 EXTRACTION_PROMPT = """
-You are a highly capable financial data extraction assistant.
+You are a highly capable financial data extraction assistant specializing in Indonesian and International bank statements.
 Your task is to extract information from the provided bank statement image(s) and return it EXACTLY in the requested JSON structure.
+
+CRITICAL RULES FOR DEBIT AND CREDIT:
+1. Bank layouts vary. Sometimes they use "Mutasi Debet/Kredit", "Tarikan/Setoran", or a single amount column with "DB/CR".
+2. You MUST use mathematical logic to determine if an amount is a Debit or Credit:
+   - If the Running Balance DECREASES, the transaction is a DEBIT.
+   - If the Running Balance INCREASES, the transaction is a CREDIT.
+3. Pay close attention to the summary section of the document. If the document states "Total Transaksi Debet: 80" and "Total Transaksi Kredit: 26", you MUST extract those exact numbers into `debit_transaction_count` and `credit_transaction_count`.
 
 Analyze the layout, tables, and text to accurately extract the following fields. Do not invent data; if a field is missing, leave it as an empty string (or 0 for numbers).
 
@@ -28,6 +35,10 @@ Ensure the output is a raw JSON object matching this schema:
   "statement_period": "string",
   "opening_balance": float (0 if missing),
   "closing_balance": float (0 if missing),
+  "total_debit_amount": float (0 if missing),
+  "total_credit_amount": float (0 if missing),
+  "debit_transaction_count": int (0 if missing),
+  "credit_transaction_count": int (0 if missing),
   "transactions": [
     {
       "date": "string (e.g., YYYY-MM-DD or as written)",

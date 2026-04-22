@@ -17,12 +17,14 @@ def upload_and_process(file: UploadFile = File(...), db: Session = Depends(get_d
         contents = file.file.read()
         extracted_data = process_document(contents, file.filename)
 
-        # Fallback calculation for summaries if Gemini fails to extract them
+        # Fallback calculation for summaries if Gemini fails to extract them from the document header/footer.
+        # We only apply this if the value is explicitly 0 to avoid overwriting a successfully extracted summary
+        # (e.g. if the document says 80 debits, but we only extracted 73 due to pagination, we want to keep 80).
         if extracted_data.transactions:
             if extracted_data.total_debit_amount == 0.0:
-                extracted_data.total_debit_amount = sum(t.debit for t in extracted_data.transactions)
+                extracted_data.total_debit_amount = round(sum(t.debit for t in extracted_data.transactions), 2)
             if extracted_data.total_credit_amount == 0.0:
-                extracted_data.total_credit_amount = sum(t.credit for t in extracted_data.transactions)
+                extracted_data.total_credit_amount = round(sum(t.credit for t in extracted_data.transactions), 2)
             if extracted_data.debit_transaction_count == 0:
                 extracted_data.debit_transaction_count = sum(1 for t in extracted_data.transactions if t.debit > 0)
             if extracted_data.credit_transaction_count == 0:
