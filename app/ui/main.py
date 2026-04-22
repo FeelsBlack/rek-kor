@@ -45,30 +45,17 @@ with tab1:
         with col1:
             st.write(f"**Bank:** {data.get('bank_name')}")
             st.write(f"**Account:** {data.get('account_number')}")
-            st.write(f"**Opening Balance:** {data.get('opening_balance', 0):,.2f}")
-            st.write(f"**Total Debit:** {data.get('total_debit_amount', 0):,.2f} ({data.get('debit_transaction_count', 0)} trx)")
+            st.write(f"**Opening Balance:** {data.get('opening_balance', 0)}")
+            st.write(f"**Total Debit:** {data.get('total_debit_amount', 0)} ({data.get('debit_transaction_count', 0)} trx)")
         with col2:
             st.write(f"**Holder:** {data.get('account_holder')}")
             st.write(f"**Period:** {data.get('statement_period')}")
-            st.write(f"**Closing Balance:** {data.get('closing_balance', 0):,.2f}")
-            st.write(f"**Total Credit:** {data.get('total_credit_amount', 0):,.2f} ({data.get('credit_transaction_count', 0)} trx)")
+            st.write(f"**Closing Balance:** {data.get('closing_balance', 0)}")
+            st.write(f"**Total Credit:** {data.get('total_credit_amount', 0)} ({data.get('credit_transaction_count', 0)} trx)")
 
         st.write("### Transactions")
         df_transactions = pd.DataFrame(data.get('transactions', []))
-
-        # Display with column config to enforce strict formatting without converting to strings
-        if not df_transactions.empty:
-            st.dataframe(
-                df_transactions,
-                column_config={
-                    "debit": st.column_config.NumberColumn("Debit", format=",.2f"),
-                    "credit": st.column_config.NumberColumn("Credit", format=",.2f"),
-                    "balance": st.column_config.NumberColumn("Balance", format=",.2f"),
-                },
-                use_container_width=True
-            )
-        else:
-            st.dataframe(df_transactions)
+        st.dataframe(df_transactions, use_container_width=True)
 
 
 with tab2:
