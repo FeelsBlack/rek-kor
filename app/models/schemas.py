@@ -13,6 +13,8 @@ class StatementSchema(BaseModel):
     account_number: str = Field(description="Account number")
     account_holder: str = Field(description="Name of the account holder")
     statement_period: str = Field(description="Period the statement covers (e.g., 'Jan 1 - Jan 31, 2023')")
+    opening_balance: float = Field(default=0.0, description="Opening balance of the statement period")
+    closing_balance: float = Field(default=0.0, description="Closing balance of the statement period")
     transactions: List[TransactionSchema]
 
 class ValidationResult(BaseModel):

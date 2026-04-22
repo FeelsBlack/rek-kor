@@ -22,15 +22,20 @@ with tab1:
     uploaded_file = st.file_uploader("Choose a PDF or Image file", type=["pdf", "png", "jpg", "jpeg"])
 
     if st.button("Process Document") and uploaded_file is not None:
-        with st.spinner("Processing with Gemini..."):
+        with st.status("Processing document...", expanded=True) as status:
+            st.write("Uploading file to server...")
             files = {"file": (uploaded_file.name, uploaded_file.getvalue(), uploaded_file.type)}
+
+            st.write("Extracting data via Gemini AI (This may take 5-10 seconds)...")
             response = requests.post(f"{API_URL}/process-document", files=files)
 
             if response.status_code == 200:
-                st.success("Successfully processed!")
+                st.write("Saving to database...")
                 st.session_state['extracted_data'] = response.json()
+                status.update(label="Document processed successfully!", state="complete", expanded=False)
             else:
-                st.error(f"Error processing document: {response.text}")
+                status.update(label="Error processing document.", state="error", expanded=True)
+                st.error(f"Error details: {response.text}")
 
     if st.session_state['extracted_data']:
         st.subheader("Extracted Data")
@@ -40,9 +45,11 @@ with tab1:
         with col1:
             st.write(f"**Bank:** {data.get('bank_name')}")
             st.write(f"**Account:** {data.get('account_number')}")
+            st.write(f"**Opening Balance:** {data.get('opening_balance')}")
         with col2:
             st.write(f"**Holder:** {data.get('account_holder')}")
             st.write(f"**Period:** {data.get('statement_period')}")
+            st.write(f"**Closing Balance:** {data.get('closing_balance')}")
 
         st.write("### Transactions")
         df_transactions = pd.DataFrame(data.get('transactions', []))

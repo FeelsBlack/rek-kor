@@ -23,7 +23,9 @@ def upload_and_process(file: UploadFile = File(...), db: Session = Depends(get_d
             bank_name=extracted_data.bank_name,
             account_number=extracted_data.account_number,
             account_holder=extracted_data.account_holder,
-            statement_period=extracted_data.statement_period
+            statement_period=extracted_data.statement_period,
+            opening_balance=extracted_data.opening_balance,
+            closing_balance=extracted_data.closing_balance
         )
         db.add(db_statement)
         db.flush() # get the ID
@@ -75,6 +77,8 @@ def reconcile_data(request: ReconciliationRequest, db: Session = Depends(get_db)
         account_number=db_statement.account_number,
         account_holder=db_statement.account_holder,
         statement_period=db_statement.statement_period,
+        opening_balance=db_statement.opening_balance,
+        closing_balance=db_statement.closing_balance,
         transactions=transactions
     )
 

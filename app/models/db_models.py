@@ -11,6 +11,8 @@ class Statement(Base):
     account_number = Column(String, index=True)
     account_holder = Column(String)
     statement_period = Column(String)
+    opening_balance = Column(Float, default=0.0)
+    closing_balance = Column(Float, default=0.0)
 
     transactions = relationship("Transaction", back_populates="statement", cascade="all, delete")
 
