@@ -31,6 +31,7 @@ Ensure the output is a raw JSON object matching this schema:
   "transactions": [
     {
       "date": "string (e.g., YYYY-MM-DD or as written)",
+      "time": "string (e.g., HH:MM:SS or empty if not present)",
       "description": "string",
       "debit": float (0 if none),
       "credit": float (0 if none),

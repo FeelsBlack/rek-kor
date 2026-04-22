@@ -13,6 +13,10 @@ class Statement(Base):
     statement_period = Column(String)
     opening_balance = Column(Float, default=0.0)
     closing_balance = Column(Float, default=0.0)
+    total_debit_amount = Column(Float, default=0.0)
+    total_credit_amount = Column(Float, default=0.0)
+    debit_transaction_count = Column(Integer, default=0)
+    credit_transaction_count = Column(Integer, default=0)
 
     transactions = relationship("Transaction", back_populates="statement", cascade="all, delete")
 
@@ -22,6 +26,7 @@ class Transaction(Base):
     id = Column(Integer, primary_key=True, index=True)
     statement_id = Column(Integer, ForeignKey("statements.id"))
     date = Column(String) # Storing as string initially to handle parsing issues, can refine to Date later
+    time = Column(String, default="")
     description = Column(String)
     debit = Column(Float, default=0.0)
     credit = Column(Float, default=0.0)
